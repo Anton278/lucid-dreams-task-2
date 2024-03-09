@@ -6,6 +6,11 @@
   background-color: lightcoral;
 }
 
-.wrapper {
+.codemirror-wrapper {
   border: 1px solid #000;
+}
+
+.error {
+  color: tomato;
+  margin-top: 0;
 }

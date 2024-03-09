@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Controlled as CodeMirror } from "react-codemirror2";
+import axios from "axios";
 
 import "codemirror/lib/codemirror.css";
 import "codemirror/theme/material.css";
@@ -15,6 +16,7 @@ function MyEditor() {
   const [variants, setVariants] = useState([]);
   const [ranges, setRanges] = useState([]);
   const [result, setResult] = useState("");
+  const [error, setError] = useState("");
 
   const options = {
     mode: "javascript",
@@ -22,11 +24,16 @@ function MyEditor() {
 
   useEffect(() => {
     async function getItems() {
-      const res = await fetch(
-        "https://652f91320b8d8ddac0b2b62b.mockapi.io/autocomplete"
-      );
-      const data = await res.json();
-      setItems(data.map((item, i) => ({ ...item, id: i + 1 })));
+      try {
+        const res = await axios.get(
+          "-https://652f91320b8d8ddac0b2b62b.mockapi.io/autocomplete"
+        );
+        setItems(res.data.map((item, i) => ({ ...item, id: i + 1 })));
+      } catch (err) {
+        setError(
+          "Failed to get autocomplete items. Check server or internet connection"
+        );
+      }
     }
 
     getItems();
@@ -62,7 +69,8 @@ function MyEditor() {
 
   return (
     <div>
-      <div className="wrapper">
+      {error && <p className="error">{error}</p>}
+      <div className="codemirror-wrapper">
         <CodeMirror
           value={value}
           options={options}
