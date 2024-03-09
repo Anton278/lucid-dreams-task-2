@@ -9,11 +9,12 @@ import "./App.css";
 import "codemirror/mode/javascript/javascript";
 
 function MyEditor() {
-  const [value, setValue] = useState(`Item 1. lalal`);
+  const [value, setValue] = useState(``);
   const [items, setItems] = useState([]);
   const [editor, setEditor] = useState();
   const [variants, setVariants] = useState([]);
   const [ranges, setRanges] = useState([]);
+  const [result, setResult] = useState("");
 
   const options = {
     mode: "javascript",
@@ -44,6 +45,20 @@ function MyEditor() {
       )
     );
   }, [ranges, editor]);
+
+  const calculate = async () => {
+    const str = value.replaceAll(/name\s\d+/g, (match) => {
+      const item = items.find((item) => item.name === match);
+      return item.value;
+    });
+
+    try {
+      const res = eval(str);
+      setResult(res);
+    } catch (err) {
+      setResult("Error");
+    }
+  };
 
   return (
     <div>
@@ -96,10 +111,10 @@ function MyEditor() {
           ))}
         </ul>
       )}
-      {/* <div>
-        <button>Calculate</button>
-        <p>Result: </p>
-      </div> */}
+      <div>
+        <button onClick={calculate}>Calculate</button>
+        <p>Result: {result}</p>
+      </div>
     </div>
   );
 }
