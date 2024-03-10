@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Controlled as CodeMirror } from "react-codemirror2";
-import axios from "axios";
+
+import { useAutocompleteStore } from "./strores/autocomplete";
 
 import "codemirror/lib/codemirror.css";
 import "codemirror/theme/material.css";
@@ -11,14 +12,13 @@ import "codemirror/mode/javascript/javascript";
 
 function MyEditor() {
   const [value, setValue] = useState(``);
-  const [items, setItems] = useState([]);
   const [editor, setEditor] = useState();
-  const [variants, setVariants] = useState([]);
   const [ranges, setRanges] = useState([]);
   const [result, setResult] = useState("--");
-  const [error, setError] = useState("");
   const autocompleteRef = useRef();
   const codemirrorRef = useRef();
+
+  const autocompleteState = useAutocompleteStore();
 
   const options = {
     mode: "javascript",
@@ -26,20 +26,7 @@ function MyEditor() {
   };
 
   useEffect(() => {
-    async function getItems() {
-      try {
-        const res = await axios.get(
-          "https://652f91320b8d8ddac0b2b62b.mockapi.io/autocomplete"
-        );
-        setItems(res.data.map((item, i) => ({ ...item, id: i + 1 })));
-      } catch (err) {
-        setError(
-          "Failed to get autocomplete items. Check server or internet connection"
-        );
-      }
-    }
-
-    getItems();
+    autocompleteState.getItems();
   }, []);
 
   useEffect(() => {
@@ -64,7 +51,7 @@ function MyEditor() {
         !autocompleteRef.current.contains(e.target) &&
         !codemirrorRef.current.contains(e.target)
       ) {
-        setVariants([]);
+        autocompleteState.setVariants([]);
       }
     };
     document.addEventListener("click", handler);
@@ -76,7 +63,7 @@ function MyEditor() {
 
   const calculate = async () => {
     const str = value.replaceAll(/name\s\d+/g, (match) => {
-      const item = items.find((item) => item.name === match);
+      const item = autocompleteState.items.find((item) => item.name === match);
       return item.value;
     });
 
@@ -90,7 +77,9 @@ function MyEditor() {
 
   return (
     <div className="container">
-      {error && <p className="error">{error}</p>}
+      {autocompleteState.error && (
+        <p className="error">{autocompleteState.error}</p>
+      )}
       <div className="autocomplete">
         <div className="codemirror-wrapper" ref={codemirrorRef}>
           <CodeMirror
@@ -102,13 +91,13 @@ function MyEditor() {
               const words = value.split(" ");
               const lastWord = words[words.length - 1];
               if (!lastWord) {
-                return setVariants([]);
+                return autocompleteState.setVariants([]);
               }
 
-              const variants = items.filter((item) =>
+              const variants = autocompleteState.items.filter((item) =>
                 item.name.toLowerCase().includes(lastWord.toLowerCase())
               );
-              setVariants(variants);
+              autocompleteState.setVariants(variants);
             }}
             editorDidMount={(editor) => {
               setEditor(editor);
@@ -116,9 +105,9 @@ function MyEditor() {
             }}
           />
         </div>
-        {variants.length !== 0 && (
+        {autocompleteState.variants.length !== 0 && (
           <ul className="autocomplete-list" ref={autocompleteRef}>
-            {variants.map((variant) => (
+            {autocompleteState.variants.map((variant) => (
               <li key={variant.id}>
                 <button
                   onClick={() => {
@@ -133,7 +122,7 @@ function MyEditor() {
                       ...ranges,
                       { from: lastWordIndex, to: newValue.length },
                     ]);
-                    setVariants([]);
+                    autocompleteState.setVariants([]);
                   }}
                 >
                   {variant.name}
