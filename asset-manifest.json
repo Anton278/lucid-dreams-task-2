@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/lucid-dreams-task-2/static/css/main.3f9b3739.css",
+    "main.js": "/lucid-dreams-task-2/static/js/main.08b7cccf.js",
+    "index.html": "/lucid-dreams-task-2/index.html",
+    "main.3f9b3739.css.map": "/lucid-dreams-task-2/static/css/main.3f9b3739.css.map",
+    "main.08b7cccf.js.map": "/lucid-dreams-task-2/static/js/main.08b7cccf.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3f9b3739.css",
+    "static/js/main.08b7cccf.js"
+  ]
+}
