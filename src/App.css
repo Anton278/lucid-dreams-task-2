@@ -59,6 +59,13 @@
   background-color: lightgrey;
 }
 
+.x {
+  border: none;
+  padding: 2px 5px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
 @media (max-width: 1536px) {
   .container {
     max-width: 1200px;

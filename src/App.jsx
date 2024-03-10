@@ -61,9 +61,33 @@ function MyEditor() {
     };
   }, [autocompleteRef, codemirrorRef]);
 
+  useEffect(() => {
+    const x = Array.from(
+      document.querySelectorAll("span.my-marker.cm-variable")
+    ).filter((el) => el.innerText === "x");
+
+    x.forEach((item) =>
+      item.addEventListener("click", (e) => {
+        const input = document.createElement("input");
+        input.value = "x";
+        e.target.after(input);
+        e.target.innerText = "";
+        input.focus();
+        input.onblur = () => {
+          e.target.innerText = "x";
+          input.remove();
+          // console.log(editor.getAllMarks());
+        };
+      })
+    );
+  }, [value]);
+
   const calculate = async () => {
-    const str = value.replaceAll(/name\s\d+/g, (match) => {
-      const item = autocompleteState.items.find((item) => item.name === match);
+    const str = value.replaceAll(/name\s\d+\s\|\sx/g, (match) => {
+      console.log(match);
+      const item = autocompleteState.items.find(
+        (item) => item.name === match.replace(" | x", "")
+      );
       return item.value;
     });
 
@@ -102,6 +126,8 @@ function MyEditor() {
             editorDidMount={(editor) => {
               setEditor(editor);
               editor.setSize(null, "auto");
+              // editor.markText({}, {}, {})
+              // editor.getAllMarks()
             }}
           />
         </div>
@@ -116,7 +142,7 @@ function MyEditor() {
                     const lastWordIndex = value.length - lastWord.length;
 
                     const newValue =
-                      value.slice(0, lastWordIndex) + variant.name;
+                      value.slice(0, lastWordIndex) + variant.name + " | x ";
                     setValue(newValue);
                     setRanges([
                       ...ranges,
